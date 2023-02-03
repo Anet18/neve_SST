@@ -1102,10 +1102,19 @@ class Graph
             }
 
             MPI_Barrier(comm_);
-
+#if 0
             MPI_Gatherv(nbr_pes.data(), nbr_pes_size, MPI_GRAPH_TYPE, 
                     pe_list.data(), rcounts.data(), rdispls.data(), 
                     MPI_GRAPH_TYPE, 0, comm_);
+#endif
+            MPI_Send(nbr_pes.data(), nbr_pes_size, MPI_GRAPH_TYPE, 0, 100, comm_);
+
+            if (rank_ == 0)
+            {
+              for (int i = 0; i < size_; i++)
+                MPI_Recv(pe_list.data() + rdispls[i], rcounts[i], 
+                    MPI_GRAPH_TYPE, i, 100, comm_, MPI_STATUS_IGNORE);
+            }
 
             if (rank_ == 0)
             {
